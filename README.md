@@ -13,6 +13,7 @@ Background
 A recent ColdCard hardware‑wallet vulnerability exposed users who relied solely on the device’s internal RNG. Users who supplied their own entropy—commonly via physical dice rolls—were unaffected.
 
 Rolling dice is reliable but tedious. Generating a 256‑bit seed requires:
+<<<<<<< HEAD
 $$\frac{256}{\log_2(6)} \approx 99.5 dice rolls $$
 Some users prefer drawing playing cards instead. If each draw is with replacement and the deck is properly shuffled, each draw yields:
 $$\log_2(52) \approx 5.7 bits$$
@@ -23,6 +24,29 @@ if the card is replaced and the deck adequately shuffled each time.
 
 ##Entropy Limits: Cards Without Replacement
 If cards are drawn **without replacement**, the total entropy available is:
+=======
+```math
+\frac{256}{\log_2(6)} \approx 99.5 
+```
+dice rolls.
+Some users prefer drawing playing cards instead. If each draw is with replacement and the deck is properly shuffled, each draw yields:
+```math
+\log_2(52) \approx 5.7
+```
+bits,
+so producing 256 bits requires
+```math
+\frac{256}{\log_2(52)} \approx 44.9
+```
+card draws, assuming each card is replaced and the deck adequately shuffled each time.
+
+## Entropy Limits: Cards Without Replacement
+If cards are drawn **without replacement**, the total entropy available is
+```math
+\log_2(52!) \approx 67.9 
+```
+bits.
+>>>>>>> 52c1a02 (Revise formatting of README)
 
 $$\log_2(52!) \approx 67.9 bits$$
 
@@ -82,6 +106,10 @@ Both are dangerous in cryptographic contexts. This project demonstrates how to c
 
 ##Usage'''
 python convert_cards.py "AH KD 7S TC"
+<<<<<<< HEAD
 '''
 
+=======
+```
+>>>>>>> 52c1a02 (Revise formatting of README)
 The script prints the base‑6 digits representing the same entropy.
