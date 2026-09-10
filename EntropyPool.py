@@ -29,7 +29,10 @@ class CardEntropyPool:
         # line like: "KH 4S 9D"
         tokens = [t for t in line.strip().split() if t]
         for t in tokens:
-            self._add_single_card(t)
+            try:
+                self._add_single_card(t)
+            except ValueError as e:
+                print(f"Error adding card {t}: {e}")
 
     def _add_single_card(self, card_str):
         if self.deck_size_remaining() <= 0:
@@ -73,7 +76,7 @@ class CardEntropyPool:
             b = self._consume_bits_raw(3)
             v = b[0] & 0b111
             if v < 6:
-                return v + 1
+                return v + 1 # v+1 as die face is 1..6, not 0..5
 
     def roll_dice_batch(self, m=6):
         needed_bits = m * math.log2(6)

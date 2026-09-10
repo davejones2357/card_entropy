@@ -9,7 +9,7 @@ def main():
         line = input("> ").strip()
         if not line:
             continue
-        if line.lower()[3:] == "fin":
+        if line.lower()[:3] == "fin":
             break
         if line.lower() == "mix":
             pool.mix()
