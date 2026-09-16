@@ -31,8 +31,8 @@ class CardEntropyPool:
         for t in tokens:
             try:
                 self._add_single_card(t)
-            except ValueError as e:
-                print(f"Error adding card {t}: {e}")
+            except Exception as e:
+                print(f"Error adding card: {e}")
 
     def _add_single_card(self, card_str):
         if self.deck_size_remaining() <= 0:
