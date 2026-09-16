@@ -25,24 +25,30 @@ bits, so producing 256 bits requires
 card draws, if the card is replaced and the deck adequately shuffled each time.
 
 ## Entropy Limits: Cards Without Replacement
-If cards are drawn **without replacement**, the total entropy available is 
+Replacing each card and reshuffling the deck would of course be far more tedious than rolling dice. If cards are drawn **without replacement**, the total entropy available is 
 ```math
-\log_2(52!) \approx 67.9
+\log_2(52!) \approx 225.6
 ```
-bits. The 0.9 is significant because it has to be thrown away. 67 bits are available, trying to get 68 would be an error - the highest bit would not be genuinely random. Hence the important part of this exercise: **preserve entropy**.
+bits, which falls short of the 256 required to generate a private key. 
+
+Around the 39th card drawn, the entropy has fallen off by around a third of its initial value:
+```math
+\frac{ \log_2(52-38)}{ \log_2(52)} \approx \frac{2}{3}
+```
+Given that the deck has to be reshuffled at least once to complete the job, this is a  sensible point to remind the user to do it.
 
 ## Input Format (Base‑13 Card Encoding)
 Each playing card is encoded as a two‑character base‑13 number:
 
-Low‑order digit: Suit
+High‑order digit: Suit
 |Suit|Symbol|Value|
 |---|---|---|
-|Heart |H	| 0	|
+|Club |C	| 0	|
 |Diamond |D 	| 1	|
-|Spade |S 	| 2	|
-|Club |C 	| 3	|
+|Heart |H 	| 2	|
+|Spade |S 	| 3	|
 
-High‑order digit: Value
+Low‑order digit: Value
 |Card|Symbol|Value|
 |---|---|---|
 |Ten |T 	| 0	|
@@ -54,47 +60,57 @@ High‑order digit: Value
 |Queen |Q 	| B	|
 |King |K 	| C	|
 
-So for example, AS is the ace of spades and is encoded as 12 in base-52.
+So for example, AS is the ace of spades and is encoded as 31 in base-13.
 
 This yields 52 valid combinations, even though the encoding space is $$13^2 = 169$$.
 The script validates input to ensure only real card combinations are accepted.
 
 ## What the Script Does
-* Accepts a string of card codes in the two‑digit base‑13 format.
-* Converts the sequence into a single large integer (base‑52).
-* Re‑encodes that integer into base‑6 digits.
-* Outputs a sequence equivalent to rolling M six‑sided dice.
-* Ensures no entropy is lost or artificially created.
+The script runs in two distinct phases:
+* Build an entropy pool from cards drawn randomly from a deck.
+* Consume entropy from the pool in order to mimic dice rolls.
+
+### Phase 1 - Collect card draws
+*	Prompts for card batches (e.g. KH 4S 9D).
+*	Commands:
+*	**mix** → folds drawn cards into the entropy pool.
+*	**finished** (or **fin**) → end phase 1.
+*	After each input display the size of the entropy pool and number of cards remaining in the deck. Warns when less than 12 cards remain.
+
+### Phase 2 - Output dice rolls 
+* Asks the user for a preferred batch size (default to 6).
+* Consume bits from the entropy pool.
+* Outputs a sequence equivalent to rolling six‑sided dice.
+* User presses RETURN to repeat until pool is exhausted.
 
 ## Example
 
 Input:
 ```
-AH KD 7S TC
+Phase 1: enter card batches (e.g. 'KH 4S 9D'). Type 'mix' to hash, 'finished' to move on.
+> 6S AH AS 3S 8C 7D 6H 3C KC 6D
+Entropy pool: 55.67 bits, deck remaining: 42
+> 8S 3H AD JH 5H 7H 5C QS QH 8D
+Entropy pool: 107.92 bits, deck remaining: 32
+> fin
 ```
 
-Internal representation:
+Output:
 ```
-10 C1 72 03
-```
-
-Output (example):
-```
-3 5 1 6 2 4 4 1 ...
+Dice per batch (default 6):
+Dice: [4, 3, 5, 2, 1, 3]
+Press Enter for next batch, or 'q' to quit:
+Dice: [2, 1, 1, 4, 2, 3]
+Press Enter for next batch, or 'q' to quit:
+Dice: [6, 6, 6, 3, 1, 3]
+Press Enter for next batch, or 'q' to quit:
+Done: Not enough mixed bytes in reservoir; call mix() or add more cards.
 ```
 
 ## Why This Matters
-Entropy conversion is subtle. If you convert between bases incorrectly, you can:
-
-discard randomness (entropy loss), or
-
-create biased digits (entropy inflation).
-
-Both are dangerous in cryptographic contexts. This project demonstrates how to convert entropy correctly, even though it is not intended for real‑world security.
+Entropy conversion is subtle. If you convert between bases incorrectly, you can discard randomness (entropy loss), or create biased digits (entropy inflation). Both are dangerous in cryptographic contexts. This project demonstrates how to convert entropy correctly, even though it is not intended for real‑world security.
 
 ## Usage
 ```
-python convert_cards.py "AH KD 7S TC"
+python convert_cards.py
 ```
-
-The script prints the base‑6 digits representing the same entropy.
