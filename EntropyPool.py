@@ -7,6 +7,23 @@ RANKS = {
 }
 SUITS = {'C': 0, 'D': 1, 'H': 2, 'S': 3}
 
+
+class CardPoolError(ValueError):
+    """Base exception for invalid card-draw operations."""
+
+
+class DeckExhaustedError(CardPoolError):
+    """Raised when the deck has no remaining cards to draw."""
+
+
+class DuplicateCardError(CardPoolError):
+    """Raised when a card is requested again without replacement."""
+
+
+class InsufficientEntropyError(CardPoolError):
+    """Raised when there is insufficient entropy to perform the requested operation."""
+
+
 def card_to_index(card_str):
     card_str = card_str.strip().upper()
     if len(card_str) != 2:
@@ -31,15 +48,15 @@ class CardEntropyPool:
         for t in tokens:
             try:
                 self._add_single_card(t)
-            except Exception as e:
+            except ValueError as e:
                 print(f"Error adding card: {e}")
 
     def _add_single_card(self, card_str):
         if self.deck_size_remaining() <= 0:
-            raise RuntimeError("Deck exhausted, reshuffle needed.")
+            raise DeckExhaustedError("Deck exhausted, reshuffle needed.")
         idx = card_to_index(card_str)
         if idx in self.drawn_cards:
-            raise RuntimeError(f"Card {card_str} already drawn (no replacement).")
+            raise DuplicateCardError(f"Card {card_str} already drawn (no replacement).")
         self.drawn_cards.append(idx)
 
         # entropy of this draw: log2(remaining_cards_before_draw)
@@ -64,7 +81,7 @@ class CardEntropyPool:
     def _consume_bits_raw(self, n_bits):
         needed_bytes = math.ceil(n_bits / 8)
         if len(self.reservoir) < needed_bytes:
-            raise RuntimeError("Not enough mixed bytes in reservoir; call mix() or add more cards.")
+            raise InsufficientEntropyError("Not enough mixed bytes in reservoir; call mix() or add more cards.")
         out = self.reservoir[:needed_bytes]
         self.reservoir = self.reservoir[needed_bytes:]
         self.entropy_bits -= n_bits
@@ -81,6 +98,6 @@ class CardEntropyPool:
     def roll_dice_batch(self, m=6):
         needed_bits = m * math.log2(6)
         if self.available_bits() < needed_bits:
-            raise RuntimeError("Not enough entropy for requested batch.")
+            raise InsufficientEntropyError("Not enough entropy for requested batch.")
         dice = [self.roll_die() for _ in range(m)]
         return dice

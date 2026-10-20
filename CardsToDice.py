@@ -19,12 +19,14 @@ def main():
 
         pool.add_cards_from_shorthand(line)
         print(f"Entropy pool: {pool.available_bits():.2f} bits, "
-              f"deck remaining: {pool.deck_size_remaining()}")
+            f"deck remaining: {pool.deck_size_remaining()}")
 
         # reshuffle hint
-        if pool.deck_size_remaining() <= 12:
+        if pool.deck_size_remaining() <= 0:
+            print("Warning: Deck exhausted. Please reshuffle the deck before adding more cards.")
+        elif pool.deck_size_remaining() <= 12:
             print("Warning: low deck entropy per draw; consider reshuffling soon.")
-
+        
     # ensure we have mixed whatever is in drawn_cards
     pool.mix()
     print(f"\nPhase 2: dice output. Entropy pool: {pool.available_bits():.2f} bits.")
