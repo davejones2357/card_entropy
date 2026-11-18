@@ -1,6 +1,7 @@
 # Entropy Conversion: Playing Cards → Base‑6 Dice Rolls
+
 ## Disclaimer 
-The code in this repo is just an exercise.
+The code in this repo is just an exercise.  
 Do not use it to secure anything valuable!
 
 ## Overview
@@ -13,7 +14,7 @@ Rolling dice is reliable but tedious. Generating a 256‑bit seed requires
 ```math
 \frac{256}{\log_2(6)} \approx 100 
 ```
-dice rolls.
+dice rolls.  
 An alternative is drawing playing cards from a well shuffled deck. If each draw is made with replacement and the deck is properly shuffled, each draw yields 
 ```math
 \log_2(52) \approx 5.7 
@@ -35,7 +36,7 @@ Around the 39th card drawn, the entropy has fallen off by around a third of its 
 ```math
 \frac{ \log_2(52-38)}{ \log_2(52)} \approx \frac{2}{3}
 ```
-Given that the deck has to be reshuffled at least once to complete the job, this is a  sensible point to remind the user to do it.
+Given that the deck has to be reshuffled at least once to complete the job, this is a sensible point to remind the user to do it.
 
 ## Input Format (Base‑13 Card Encoding)
 Each playing card is encoded as a two‑character base‑13 number:
@@ -54,7 +55,7 @@ Low‑order digit: Value
 |Ten |T 	| 0	|
 |Ace |A 	| 1	|
 |2 |2 	| 2	|
-|	...	|
+|...|...|...|
 |9 |9 | 9	|
 |Jack |J 	| A	|
 |Queen |Q 	| B	|
@@ -62,7 +63,7 @@ Low‑order digit: Value
 
 So for example, AS is the ace of spades and is encoded as 31 in base-13.
 
-This yields 52 valid combinations, even though the encoding space is $$13^2 = 169$$.
+This yields 52 valid combinations, even though the encoding space is $$13^2 = 169$$.  
 The script validates input to ensure only real card combinations are accepted.
 
 ## What the Script Does
@@ -71,11 +72,11 @@ The script runs in two distinct phases:
 * Consume entropy from the pool in order to mimic dice rolls.
 
 ### Phase 1 - Collect card draws
-*	Prompts for card batches (e.g. KH 4S 9D).
-*	Commands:
-*	**mix** → folds drawn cards into the entropy pool.
-*	**finished** (or **fin**) → end phase 1.
-*	After each input display the size of the entropy pool and number of cards remaining in the deck. Warns when less than 12 cards remain.
+* Prompts for card batches (e.g. KH 4S 9D).
+* Commands:
+  * **mix** → folds drawn cards into the entropy pool.
+  * **finished** (or **fin**) → end phase 1.
+* After each input, display the size of the entropy pool and number of cards remaining in the deck. Warns when less than 12 cards remain.
 
 ### Phase 2 - Output dice rolls 
 * Asks the user for a preferred batch size (default to 6).
@@ -110,7 +111,13 @@ Done: Not enough mixed bytes in reservoir; call mix() or add more cards.
 ## Why This Matters
 Entropy conversion is subtle. If you convert between bases incorrectly, you can discard randomness (entropy loss), or create biased digits (entropy inflation). Both are dangerous in cryptographic contexts. This project demonstrates how to convert entropy correctly, even though it is not intended for real‑world security.
 
-## Usage
+## Setup
+1. Install Python 3.
+2. Clone or download this repository and change to its directory.
+3. Run the script:
+
 ```
-python convert_cards.py
+python CardsToDice.py
 ```
+
+The project uses only the Python standard library, so no additional dependencies or virtual environment are required.
